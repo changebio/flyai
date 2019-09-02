@@ -1,0 +1,15 @@
+torch
+torchvision
+numpy
+keras
+utils
+flyai
+pandas
+tensorflow
+jieba
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

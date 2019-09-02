@@ -1,0 +1,43 @@
+---
+name: Cat Face Landmark
+author: xiaochen
+description: Cat Face Landmark
+topic: Cat Face Landmark
+algorithm: CNN
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: PyTorch
+
+data:
+  id: CatFaceLandmark
+  name: Cat Face Landmark
+  category: image
+
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: [128,128,3]
+  output:
+    columns:
+      - name: landmark
+        type: int
+    to_type: float
+    to_shape: [-1,18]
+
+
+evaluate:
+  score: torch_accuracy
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

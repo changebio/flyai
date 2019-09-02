@@ -1,0 +1,11 @@
+jieba
+keras
+Requests
+utils
+torch
+torchvision
+pandas
+numpy
+flyai
+keras-applications
+keras-preprocessing

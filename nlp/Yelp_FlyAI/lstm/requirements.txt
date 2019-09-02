@@ -1,0 +1,8 @@
+keras
+torchvision
+flyai
+pandas
+jieba
+utils
+numpy
+torch

@@ -1,0 +1,390 @@
+# -*- coding: utf-8 -*
+from __future__ import print_function
+from torch.utils.data.dataset import Dataset
+from torchvision import transforms
+import sys
+from time import time
+import json
+import os
+import platform
+import random
+import requests
+import pandas as pd
+import numpy
+
+import jieba
+import create_dict
+import numpy as np
+import re
+from math import isnan
+
+from PIL import Image
+from flyai.processor.base import Base
+from flyai.processor.download import check_download
+from flyai.utils.yaml_helper import Yaml
+from flyai.utils import read_data
+
+from path import DATA_PATH
+import config
+
+MAX_LEN = 20
+#sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+
+def make_weights_for_balanced_classes(labels, nclasses):                        
+    count = [0] * nclasses                                                      
+    for item in labels:                                                         
+        count[item] += 1                                                     
+    weight_per_class = [0.] * nclasses                                      
+    N = float(sum(count))                                                   
+    for i in range(nclasses):
+        if count[i]!=0:
+            weight_per_class[i] = N/np.sqrt(count[i])                                 
+    weight = [0] * len(labels)                                              
+    for idx, val in enumerate(labels):                                          
+        weight[idx] = weight_per_class[val]                                  
+    return weight 
+
+def words2vec(words,vocab,embedding_len,max_sts_len):
+    words = str(words)
+    words = re.sub("[\s+\.\!\/_,$%^*()+-?\"\']+|[+——！，。；？、~@#￥%……&*（）]+", " ", words)
+    words = words.strip().split(' ')
+    
+    vecs = []
+    for word in words:
+        embedding_vector = vocab.get(word)
+        if embedding_vector is not None:
+                vecs.append(embedding_vector)
+    if len(vecs) >= max_sts_len:
+        vecs = vecs[:max_sts_len]
+    elif embedding_len>1:
+        for i in range(len(vecs), max_sts_len):
+            vecs.append([0 for j in range(embedding_len)])
+    else:
+        for i in range(len(vecs), max_sts_len):
+            vecs.append(0)
+    vecs = np.stack(vecs)
+    return vecs
+
+def tokenize(text,w2d,max_len):
+    text = str(text)
+    terms = jieba.cut(text, cut_all=False)
+    truncate_terms = []
+    for term in terms:
+        truncate_terms.append(term)
+        if len(truncate_terms) >= MAX_LEN:
+            break
+    index_list = [w2d[term] if term in w2d
+                  else create_dict._UNK_ for term in truncate_terms]
+    if len(index_list) < MAX_LEN:
+        index_list = index_list + [create_dict._PAD_] * (MAX_LEN - len(index_list))
+
+    char_index_list = [w2d[c] if c in w2d
+                       else create_dict._UNK_ for c in text]
+    char_index_list = char_index_list[:MAX_LEN]
+    if len(char_index_list) < MAX_LEN:
+        char_index_list = char_index_list + [create_dict._PAD_] * (MAX_LEN - len(char_index_list))
+    return np.array(index_list)[:,None], np.array(char_index_list)[:,None]
+
+def jiebatoken(text,w2d,words_len=30,char_len=30,stack=True):
+    text = str(text)
+    fill_embed = [0.0 for i in range(200)]
+    terms = jieba.cut(text, cut_all=False)
+    vec_terms = []
+    for term in terms:
+        if term in w2d.keys() and len(vec_terms) < words_len:
+            vec_terms.append([float(i) for i in w2d[term]])
+    for j in range(words_len - len(vec_terms)):
+        vec_terms.append(fill_embed)
+    vec_terms = vec_terms[:words_len]
+    
+    char_terms = []       
+    for term in text:
+        if term in w2d.keys() and len(vec_terms) < char_len:
+            char_terms.append([float(i) for i in w2d[term]])
+    for j in range(char_len - len(char_terms)):
+        char_terms.append(fill_embed)
+    char_terms = char_terms[:char_len]
+    if stack:
+        return np.stack(vec_terms+char_terms)
+    else:
+        return np.stack(vec_terms),np.stack(char_terms)
+
+
+
+
+class Processor(Base):
+    def __init__(self):
+        self.token = None
+        self.label_dic=config.label_dic
+        with open(config.src_vocab_file, 'r') as fw:
+            self.words_dic = json.load(fw)
+        self.input_seq_len = 100
+        self.output_seq_len = 100
+
+    def input_x(self, source):
+        '''
+        参数为csv中作为输入x的一条数据，该方法会被Dataset多次调用
+        '''
+        sen2id=[]
+        source=source.split()
+        for s in source:
+            if s in self.words_dic:
+                sen2id.append(self.words_dic[s])
+            else:
+                sen2id.append(3)
+        x_ids = sen2id
+        cut = self.input_seq_len
+        x_ids_tr = np.array(x_ids[:cut] if len(x_ids) > cut else x_ids+[3]*(cut-len(x_ids)))
+        return x_ids_tr
+
+    def input_y(self, target):
+        '''
+        参数为csv中作为输入y的一条数据，该方法会被Dataset多次调用
+        '''
+        label2id = []
+        target = target.split()
+        for t in target:
+            label2id.append(self.label_dic.index(t))
+        y_ids = label2id
+        cut = self.output_seq_len
+        y_ids_tr = np.array(y_ids[:cut] if len(y_ids) > cut else y_ids+[14]*(cut-len(y_ids)))
+        return y_ids_tr
+
+    def output_y(self, outputs_seq):
+        '''
+        验证时使用，把模型输出的y转为对应的结果
+        '''
+        sent = []
+        for v in outputs_seq.argmax(axis=1):
+            sent.append(config.label_dic[v])
+       
+        return sent
+
+    def id2word(self, id):
+        id = int(id)
+        if id in self.id2word_dict:
+            return self.id2word_dict[id]
+        else:
+            return ""
+
+    def get_id_list_from(self, sentence):
+        sentence_id_list = []
+        seg_list = jieba.cut(sentence)
+        for str in seg_list:
+            sentence_id_list.append(self.word2id(str))
+        return sentence_id_list
+
+    def word2id(self, word):
+        if not isinstance(word, str):
+            print("Exception: error word not unicode")
+            sys.exit(1)
+        if word in self.word2id_dict:
+            return self.word2id_dict[word]
+        else:
+            return 3  # UNK
+
+    def get_samples(self, train_set, input_seq_len, output_seq_len):
+        """构造样本数据
+
+        :return:
+            encoder_inputs: [array([0, 0], dtype=int32), array([0, 0], dtype=int32), array([5, 5], dtype=int32),
+                            array([7, 7], dtype=int32), array([9, 9], dtype=int32)]
+            decoder_inputs: [array([1, 1], dtype=int32), array([11, 11], dtype=int32), array([13, 13], dtype=int32),
+                            array([15, 15], dtype=int32), array([2, 2], dtype=int32)]
+        """
+
+        raw_encoder_input = []
+        raw_decoder_input = []
+
+        for i in range(len(train_set[0])):
+            raw_encoder_input.append([self.PAD_ID] * (input_seq_len - len(train_set[0][i])) + list(train_set[0][i]))
+            raw_decoder_input.append(
+                [self.GO_ID] + list(train_set[1][i]) + [self.PAD_ID] * (output_seq_len - len(train_set[1][i]) - 1))
+
+        encoder_inputs = []
+        decoder_inputs = []
+        target_weights = []
+
+        for length_idx in range(input_seq_len):
+            encoder_inputs.append(
+                np.array([encoder_input[length_idx] for encoder_input in raw_encoder_input], dtype=np.int32))
+        for length_idx in range(output_seq_len):
+            decoder_inputs.append(
+                np.array([decoder_input[length_idx] for decoder_input in raw_decoder_input], dtype=np.int32))
+            target_weights.append(np.array([
+                0.0 if length_idx == output_seq_len - 1 or decoder_input[length_idx] == self.PAD_ID else 1.0 for
+                decoder_input in raw_decoder_input
+            ], dtype=np.float32))
+        return encoder_inputs, decoder_inputs, target_weights
+
+    def seq_to_encoder(self, input_seq):
+        """从输入空格分隔的数字id串，转成预测用的encoder、decoder、target_weight等
+        """
+        input_seq_array = [int(v) for v in input_seq.split()]
+        encoder_input = [self.PAD_ID] * (self.input_seq_len - len(input_seq_array)) + input_seq_array
+        decoder_input = [self.GO_ID] + [self.PAD_ID] * (self.output_seq_len - 1)
+        encoder_inputs = [np.array([v], dtype=np.int32) for v in encoder_input]
+        decoder_inputs = [np.array([v], dtype=np.int32) for v in decoder_input]
+        target_weights = [np.array([1.0], dtype=np.float32)] * self.output_seq_len
+        return encoder_inputs, decoder_inputs, target_weights    
+    
+
+embedding_path = os.path.join(DATA_PATH, 'embedding.json')
+with open(embedding_path) as f:
+    ch_vecs = json.loads(f.read())
+new_ch_vecs = dict()
+for k,v in ch_vecs.items():
+    new_ch_vecs[k] = np.array([float(i) for i in v])
+np.random.seed(0)
+new_ch_vecs['_UNK_'] = np.random.rand(200).astype(np.float32)
+np.random.seed(1)
+new_ch_vecs['_SOS_'] = np.random.rand(200).astype(np.float32)
+np.random.seed(2)
+new_ch_vecs['_EOS_'] = np.random.rand(200).astype(np.float32)
+
+
+def predict_data(question):
+    source=question.split()
+    sent = ['_SOS_','_SOS_'] + source + ['_EOS_','_EOS_']
+    sv = []
+    for j,s in enumerate(source):
+        qv = []
+        for q in sent[j:(j+5)]:
+            try:
+                qv.append(new_ch_vecs[q])
+            except:
+                qv.append(new_ch_vecs['_UNK_'])
+        sv.append(np.stack(qv))
+    return np.stack(sv)
+
+    
+class NLPFlyAI(Dataset):
+    def __init__(self, root, df, transform=None):
+        self.root=root
+        self.df=df
+        self.token = None
+        self.label_dic=config.label_dic
+        with open(config.src_vocab_file, 'r') as fw:
+            self.words_dic = json.load(fw)
+        self.input_seq_len = 100
+        self.output_seq_len = 100
+        
+        self.w2v = new_ch_vecs
+        self.w2l = self.df2dict()
+        
+
+        
+    def __len__(self):
+        return len(self.w2l)
+    
+    def __getitem__(self, index):
+        question,answer = self.w2l.iloc[index]
+        qv = []
+        for q in question:
+            try:
+                qv.append(self.w2v[q])
+            except:
+                qv.append(self.w2v['_UNK_'])
+        
+        return np.stack(qv),answer
+
+    def id2word(self, id):
+        id = int(id)
+        if id in self.id2word_dict:
+            return self.id2word_dict[id]
+        else:
+            return ""
+
+    def get_id_list_from(self, sentence):
+        sentence_id_list = []
+        seg_list = jieba.cut(sentence)
+        for str in seg_list:
+            sentence_id_list.append(self.word2id(str))
+        return sentence_id_list
+
+    def word2id(self, word):
+        if not isinstance(word, str):
+            print("Exception: error word not unicode")
+            sys.exit(1)
+        if word in self.word2id_dict:
+            return self.word2id_dict[word]
+        else:
+            return 3  # UNK
+    
+    def df2dict(self):
+        w2l,w2s = {},{}
+        for i in range(len(self.df)):
+            question,answer = self.df.iloc[i]
+            source=question.split()
+            target = answer.split()
+            sent = ['_SOS_','_SOS_'] + source + ['_EOS_','_EOS_']
+            for j,s in enumerate(source):
+                if s in self.w2v.keys():
+                    w2l[s] = self.label_dic.index(target[j])
+                    w2s[s] = sent[j:(j+5)]
+                
+        return pd.DataFrame(list(zip(w2s.values(),w2l.values())),columns=['word','label'])
+
+    
+def Csv(config,line=""):
+    if line is "":
+        line = True
+    else:
+        line = False
+    train_path = check_download(config['train_url'], DATA_PATH, is_print=line)
+    data = read_data.read(train_path)
+    val_path = check_download(config['test_url'], DATA_PATH, is_print=line)
+    val = read_data.read(val_path)
+    return data,val
+
+def load_csv(custom_source=None):
+    yaml = Yaml()
+    try:
+        f = open(os.path.join(sys.path[0], 'train.json'))
+        line = f.readline().strip()
+    except IOError:
+        line = ""
+
+    postdata = {'id': yaml.get_data_id(),
+                'env': line,
+                'time': time(),
+                'sign': random.random(),
+                'goos': platform.platform()}
+
+    try:
+        servers = yaml.get_servers()
+        r = requests.post(servers[0]['url'] + "/dataset", data=postdata)
+        source = json.loads(r.text)
+    except:
+        source = None
+
+    if source is None:
+        trn,val = Csv({'train_url': os.path.join(DATA_PATH, "dev.csv"),'test_url': os.path.join(DATA_PATH, "dev.csv")}, line)
+    elif 'yaml' in source:
+        source = source['yaml']
+        if custom_source is None:
+            trn,val = Csv(source['config'], line)
+        else:
+            source = custom_source
+    else:
+        if not os.path.exists(os.path.join(DATA_PATH, "train.csv")) and not os.path.exists(
+                os.path.join(DATA_PATH, "test.csv")):
+            raise Exception("invalid data id!")
+        else:
+            trn,val = Csv({'train_url': os.path.join(DATA_PATH, "train.csv"),'test_url': os.path.join(DATA_PATH, "test.csv")}, line)
+    print(source)
+    return trn,val
+
+
+def load_data(combine=True,summary=True):
+    trn,val = load_csv()
+    if combine:
+        trn = pd.concat([trn,val])
+    if summary:
+        data_summary = trn.describe()
+        for k in range(data_summary.shape[1]):
+            print(list(data_summary.iloc[:,k]))
+        for i in range(1,trn.shape[1]):
+            print(trn.iloc[:,i].value_counts()[:10])
+    return trn, val
+

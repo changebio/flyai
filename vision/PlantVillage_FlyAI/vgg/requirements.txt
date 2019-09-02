@@ -1,0 +1,9 @@
+numpy
+torch
+Pillow
+flyai
+matplotlib
+torchvision
+pandas
+Requests
+utils

@@ -1,0 +1,12 @@
+scikit-image
+flyai
+Pillow
+pandas
+tensorflow
+torchvision
+numpy
+torch
+Requests
+utils
+fastai
+matplotlib

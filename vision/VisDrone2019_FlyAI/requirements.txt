@@ -1,0 +1,12 @@
+opencv-python
+numpy
+flyai
+tensorflow
+config
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow
+torchvision

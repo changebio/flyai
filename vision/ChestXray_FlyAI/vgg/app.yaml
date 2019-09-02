@@ -1,0 +1,41 @@
+---
+name: AI医学影像：小儿肺炎患者诊断
+author: ChangeBio
+description: AI医学影像：小儿肺炎患者诊断
+topic: AI医学影像：小儿肺炎患者诊断
+algorithm: VGG11
+language: python3.6
+virtualenv: flyai_env/bin/
+
+framework: Pytorch
+
+
+data:
+  id: ChestXray
+  name: AI医学影像：小儿肺炎患者诊断
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: 
+  output:
+    columns:
+      - name: labels
+        type: int
+    to_type: int
+    to_shape: 
+
+evaluate:
+  score: torch_accuracy
+servers:
+  - id: flyai
+    url: https://flyai.com
+...

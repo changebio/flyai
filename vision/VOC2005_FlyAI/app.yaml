@@ -1,0 +1,39 @@
+---
+name: VOC2005 classification
+author: ChangeBio
+description: VOC2005 classification
+topic: VOC2005 classification
+algorithm: ResNet34
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: Pretrained
+
+data:
+  id: VOC2005
+  name: VOC2005 classification
+  category: image
+
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: string
+    to_type: float
+    to_shape: [-1,224, 224, 3]
+  output:
+    columns:
+      - name: label
+        type: int
+    to_type: float
+    to_shape: [-1,4]
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

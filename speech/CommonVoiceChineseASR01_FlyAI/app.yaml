@@ -1,0 +1,43 @@
+---
+name: Common Voice Chinese ASR
+author: xiaochen
+description: Common Voice Chinese ASR
+topic: Common Voice Chinese ASR
+algorithm: Seq2Seq
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: PyTorch
+
+data:
+  id: CommonVoiceChineseASR01
+  name: Common Voice Chinese ASR
+  category: speech
+
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: audio_path
+        type: url
+    to_type: float
+    to_shape: [800,20,1]
+  output:
+    columns:
+      - name: label
+        type: string
+    to_type: float
+    to_shape: [-1,3507]
+
+
+evaluate:
+  score: pytorch_percision
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

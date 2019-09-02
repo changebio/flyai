@@ -1,0 +1,8 @@
+torch
+utils
+flyai
+Pillow
+opencv-python
+keras
+torchvision
+numpy

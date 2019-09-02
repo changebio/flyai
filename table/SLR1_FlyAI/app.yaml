@@ -1,0 +1,36 @@
+---
+name: 手语识别
+author: jiayi
+description: 手语识别
+topic: 手语识别
+algorithm: CNN
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: tensorflow
+
+data:
+  id: SLR1
+  name: 手语识别
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: path
+        type: string
+    to_type: shape(H,W,d)
+  output:
+    columns:
+      - name: label
+        type: string
+    to_type: int
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

@@ -1,0 +1,9 @@
+scikit-image
+utils
+torch
+numpy
+flyai
+torchvision
+matplotlib
+Pillow
+tensorflow

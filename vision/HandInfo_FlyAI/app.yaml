@@ -1,0 +1,36 @@
+---
+name: 手部图像数据集进行性别左右正反识别
+author: jiayi
+description: 手部图像数据集进行性别左右正反识别
+topic: 手部图像数据集进行性别左右正反识别
+algorithm: Densenet
+language: Python3
+
+framework: Pytorch
+
+data:
+  id: HandInfo
+  name: 手部图像数据集进行性别左右正反识别
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: [-1,120,120]
+  output:
+    columns:
+      - name: label
+        type: int
+    to_type: int
+    to_shape: [8]
+servers:
+  - id: flyai
+    url: https://flyai.com
+...

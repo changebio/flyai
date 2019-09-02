@@ -1,0 +1,43 @@
+---
+name: face Expression Classification
+author: ChangeBio
+description: face Expression Classification
+topic: face Expression Classification
+algorithm: DenseNet
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: PyTorch
+
+data:
+  id: faceExpressionClassification
+  name: face Expression Classification
+  category: image
+
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: string
+    to_type: float
+    to_shape: [-1, 1]
+  output:
+    columns:
+      - name: label
+        type: int
+    to_type: float
+    to_shape: [-1,7]
+
+
+evaluate:
+  score: torch_accuracy
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

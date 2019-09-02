@@ -1,0 +1,14 @@
+tensorflow
+keras
+pydub
+flyai
+pandas
+soundfile
+matplotlib
+numpy
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

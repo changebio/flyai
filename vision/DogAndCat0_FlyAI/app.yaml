@@ -1,0 +1,43 @@
+---
+id: proj9728e346d0cc4056e8678f0e
+name: 猫狗大战
+author: ChangeBio
+description: 猫狗大战
+topic: 猫狗大战
+algorithm: DenseNet
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: Pretrained
+
+data:
+  id: DogAndCat0
+  name: 猫狗大战数据集
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: string
+    to_type: float
+    to_shape: [-1,224, 224, 3]
+  output:
+    columns:
+      - name: label
+        type: float
+    to_type: float
+    to_shape: [-1,2]
+  transfer_learning: 'https://download.pytorch.org/models/densenet121-241335ed.pth'
+  
+evaluate:
+  score: torch_accuracy
+
+servers:
+  - id: flyai
+    url: https://flyai.com
+...

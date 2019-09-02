@@ -1,0 +1,5 @@
+fastai==0.7.0
+flyai
+numpy
+opencv-python
+keras

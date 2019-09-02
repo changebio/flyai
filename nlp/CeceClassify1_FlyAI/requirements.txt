@@ -1,0 +1,5 @@
+jieba
+keras
+numpy
+flyai
+pandas

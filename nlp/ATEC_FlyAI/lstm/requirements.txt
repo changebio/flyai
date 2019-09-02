@@ -1,0 +1,11 @@
+bert
+pandas
+Requests
+utils
+six
+jieba
+torchvision
+numpy
+flyai
+torch
+tensorflow

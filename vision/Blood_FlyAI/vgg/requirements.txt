@@ -1,0 +1,13 @@
+torch
+matplotlib
+flyai
+torchvision
+Pillow
+numpy
+utils
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

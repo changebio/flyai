@@ -1,0 +1,4 @@
+flyai
+jieba
+numpy
+torch

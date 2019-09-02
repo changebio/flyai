@@ -1,0 +1,8 @@
+numpy
+opencv-python
+Pillow
+flyai
+torchvision
+utils
+torch
+tensorflow

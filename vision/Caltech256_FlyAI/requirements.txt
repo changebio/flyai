@@ -1,0 +1,7 @@
+numpy
+torch
+flyai
+torchvision
+dataset
+utils
+Pillow

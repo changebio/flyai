@@ -1,0 +1,38 @@
+---
+id: Enimalandflowerclassification
+name: 动植物分类
+author: ChangeBio
+description: 动植物分类
+topic: 动植物分类
+algorithm: Densenet
+language: python3
+virtualenv: flyai_env/bin/
+framework: Pytorch
+
+data:
+  id: Enimalandflowerclassification
+  name: 动植物数据集
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: string
+    to_type: float
+    to_shape: [-1,224, 224, 3]
+  output:
+    columns:
+      - name: label
+        type: float
+    to_type: float
+    to_shape: [-1,2]
+
+servers:
+  - id: flyai
+    url: https://flyai.com
+...

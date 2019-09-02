@@ -1,0 +1,39 @@
+---
+name: StanfordDogs
+author: jiayi
+description: StanfordDogs
+topic: StanfordDogs
+algorithm: CNN
+language: python3.6
+virtualenv: flyai_env/bin/
+
+framework: keras
+
+
+data:
+  id: StanfordDogs120
+  name: StanfordDogs
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: [-1,224,224,3]
+  output:
+    columns:
+      - name: labels
+        type: int
+    to_type: int
+    to_shape: [-1,120]
+
+servers:
+  - id: flyai
+    url: https://www.flyai.com
+...

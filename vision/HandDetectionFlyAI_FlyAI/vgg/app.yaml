@@ -1,0 +1,95 @@
+---
+id: HandDetectionFlyAI
+name: 人脸关键点检测
+author: ChangeBio
+description: 人脸关键点检测
+topic: topic
+algorithm: VGG11
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: Pytorch
+
+
+data:
+  id: HandDetectionFlyAI
+  name: 人脸关键点检测
+  author: jiery
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_x: input_x
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: 
+
+  output:
+    columns:
+      #- name: image_path
+      #  type: url
+      - name: p1
+        type: int
+      - name: p2
+        type: int
+      - name: p3
+        type: int
+      - name: p4
+        type: int
+      - name: p5
+        type: int
+      - name: p6
+        type: int
+      - name: p7
+        type: int
+      - name: p8
+        type: int
+      - name: p9
+        type: int
+      - name: p10
+        type: int
+      - name: p11
+        type: int
+      - name: p12
+        type: int
+      - name: p13
+        type: int
+      - name: p14
+        type: int
+      - name: p15
+        type: int
+      - name: p16
+        type: int
+      - name: p17
+        type: int
+      - name: p18
+        type: int
+      - name: p19
+        type: int
+      - name: p20
+        type: int
+      - name: p21
+        type: int
+      - name: p22
+        type: int
+      - name: p23
+        type: int
+      - name: p24
+        type: int
+      - name: p25
+        type: int
+      - name: p26
+        type: int
+    to_type: float
+    to_shape: [24]
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

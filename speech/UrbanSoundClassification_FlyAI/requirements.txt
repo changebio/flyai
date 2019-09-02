@@ -1,0 +1,13 @@
+torch
+scikit-learn
+gevent
+numpy
+librosa
+flyai
+keras
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

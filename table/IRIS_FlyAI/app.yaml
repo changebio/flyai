@@ -1,0 +1,50 @@
+---
+name: iris
+author: jiayi
+description: iris
+topic: topic
+algorithm: dnn
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: Pytorch
+
+
+data:
+  id: IRIS
+  name: Iris
+  category: mixed
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: sepal_length
+        type: float
+      - name: sepal_width
+        type: float
+      - name: petal_length
+        type: float
+      - name: petal_width
+        type: float
+    to_type: float
+    to_shape: [4]
+  output:
+    columns:
+      - name: variety
+        type: string
+
+    to_type: int
+    to_shape: [3]
+
+evaluate:
+  score: torch_accuracy
+
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

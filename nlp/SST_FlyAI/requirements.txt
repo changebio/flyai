@@ -1,0 +1,5 @@
+numpy
+flyai
+tensorflow
+six
+bert

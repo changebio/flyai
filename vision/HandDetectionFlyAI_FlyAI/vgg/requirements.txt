@@ -1,0 +1,16 @@
+numpy
+flyai
+Requests
+pandas
+Pillow
+utils
+matplotlib
+torchvision
+torch
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow
+torchvision

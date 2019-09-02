@@ -1,0 +1,8 @@
+flyai
+torchvision
+pandas
+numpy
+jieba
+torch
+Requests
+utils

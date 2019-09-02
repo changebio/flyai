@@ -1,0 +1,9 @@
+**/input
+**/data
+**/tmp
+*.zip
+**/__pycache__/
+*.flyai*
+*flyai.bat
+*flyai.exe
+*flyai

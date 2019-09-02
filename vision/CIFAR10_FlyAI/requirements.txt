@@ -1,0 +1,7 @@
+numpy
+torchvision
+flyai
+torch
+Pillow
+keras
+utils

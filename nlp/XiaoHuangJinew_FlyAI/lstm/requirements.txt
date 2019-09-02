@@ -1,0 +1,10 @@
+torchvision
+keras
+jieba
+pandas
+torch
+Pillow
+utils
+flyai
+Requests
+numpy

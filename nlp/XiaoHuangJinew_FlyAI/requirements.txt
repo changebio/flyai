@@ -1,0 +1,6 @@
+flyai
+nltk
+jieba
+conf
+tensorflow
+numpy

@@ -1,0 +1,4 @@
+numpy
+flyai
+opencv-python
+keras

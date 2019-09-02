@@ -1,0 +1,15 @@
+Requests
+flyai
+keras
+utils
+pandas
+torch
+numpy
+jieba
+torchvision
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

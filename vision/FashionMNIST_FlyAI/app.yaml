@@ -1,0 +1,44 @@
+---
+name: MNIST classification
+author: jiayi
+description: MNIST classification
+topic: MNIST classification
+algorithm: DenseNet121
+language: python3
+virtualenv: flyai_env/bin/
+
+framework: PyTorch
+
+data:
+  id: FashionMNIST
+  name: MNIST classification
+  category: image
+
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: string
+    to_type: float
+    to_shape: [-1,224, 224, 3]
+  output:
+    columns:
+      - name: label
+        type: int
+    to_type: float
+    to_shape: [-1,10]
+  transfer_learning: 'https://download.pytorch.org/models/densenet121-241335ed.pth'
+  
+
+evaluate:
+  score: torch_accuracy
+
+servers:
+ - id: flyai
+   url: https://flyai.com
+...

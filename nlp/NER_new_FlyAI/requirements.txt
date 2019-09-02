@@ -1,0 +1,12 @@
+numpy
+flyai
+chardet
+config
+tensorflow
+utils
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

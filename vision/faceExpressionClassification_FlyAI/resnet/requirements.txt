@@ -1,0 +1,8 @@
+Pillow
+resnet
+torchvision
+torch
+numpy
+flyai
+matplotlib
+utils

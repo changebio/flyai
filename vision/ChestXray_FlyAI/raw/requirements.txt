@@ -1,0 +1,13 @@
+utils
+flyai
+numpy
+pandas
+keras
+opencv-python
+Requests
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow

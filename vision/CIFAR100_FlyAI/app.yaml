@@ -1,0 +1,41 @@
+---
+name: CIFAR100图片分类
+author: jiayi
+description: CIFAR100种图片分类
+topic: CIFAR100种图片分类
+algorithm: Densenet
+language: python3.6
+virtualenv: flyai_env/bin/
+
+framework: Pytorch
+
+
+data:
+  id: CIFAR100
+  name: CIFAR100种图片分类数据
+  category: image
+
+model:
+  processor: Processor
+  input_x: input_x
+  input_y: input_y
+  output_y: output_y
+  input:
+    columns:
+      - name: image_path
+        type: url
+    to_type: float
+    to_shape: [-1,224*224]
+  output:
+    columns:
+      - name: label
+        type: int
+    to_type: int
+    to_shape: [-1,100]
+
+evaluate:
+  score: torch_accuracy
+servers:
+  - id: flyai
+    url: https://flyai.com
+...

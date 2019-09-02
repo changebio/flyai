@@ -1,0 +1,11 @@
+Pillow
+numpy
+flyai
+scikit-learn
+torch
+keras-applications
+keras-preprocessing
+tensorflow-hub
+scikit-learn
+jieba
+bert-tensorflow
